@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import csv
 
 class ProfitAnalysis:
     def __init__(self):
@@ -44,25 +45,38 @@ class ProfitAnalysis:
             self.pts += 1
 
     def scenario(self, p_price, n_price):
-        y = n_price - p_price
-        if y <= 0:  # Loss scenario
-            x = ((p_price - n_price) / p_price) * 100  # Calculate stop loss
-            if x > 10:
-                print("You should sell it because of exceeding the stop loss 1:1 zone")
-            elif x <= 1:
+            self.p_price = p_price
+            self.n_price = n_price
+            if self.n_price < self.p_price:
+             x = ((self.p_price - self.n_price) / self.p_price) * 100  # Calculate stop loss
+             if x <= 1:
                 self.pts += 1
-            elif x <= 5:
+             elif x <= 5:
                 self.pts += 2
-            elif x <= 10:
+             elif x <= 10:
                 self.pts += 3
+             elif x > 10:
+                self.pts += 4
+                return "The loss exceed 1:1 zone"
 
+x=0
+def stop_loss(p_price,n_price):
+     global x
+     if p_price > n_price:
+      x = ((p_price - n_price)/p_price)*100
+      if x>10:
+        return "The loss exceed 1:1 zone"
+      return ""
+     
 def analyze_pts(pts):
-    if pts <= 5:
+    if pts <= 4:
         return "Low level of selling suggestion"
-    elif pts <= 10:
+    elif pts <= 8:
         return "Moderate level of selling suggestion"
-    elif pts <= 15:
+    elif pts <= 13:
         return "High level of selling suggestion"
+    else:
+        return "Unknown suggestion"
     
 
 # List to store data for multiple companies
@@ -93,12 +107,15 @@ def on_analyze_button_click():
     profit_analysis.scenario(p_price, n_price)
 
     # Display results in the result_label
-    result_label.config(analyze_pts(profit_analysis.pts))
+    result_label.config(text=f"Points: {profit_analysis.pts}\n{analyze_pts(profit_analysis.pts)}")
+    stop_loss_message = stop_loss(p_price, n_price)
+    stop_loss_label.config(text=stop_loss_message)
+
 
     # Add data to the list of companies
     companies_data.append((
         p_price, n_price, p_e, roe, roa, npm, div,
-        p_e2, roe2, roa2, npm2, div2, analyze_pts(profit_analysis.pts)
+        p_e2, roe2, roa2, npm2, div2, profit_analysis.pts, analyze_pts(profit_analysis.pts),stop_loss_message
     ))
 
 # GUI setup
@@ -161,6 +178,10 @@ analyze_button.grid(row=12, column=0, columnspan=2)
 # Label to display results
 result_label = tk.Label(root, text="")
 result_label.grid(row=13, column=0, columnspan=2)
+
+
+stop_loss_label = tk.Label(root, text="")
+stop_loss_label.grid(row=14, column=0, columnspan=2)
 
 # Start the GUI event loop
 root.mainloop()
