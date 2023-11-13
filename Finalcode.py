@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 import csv
 
 class ProfitAnalysis:
@@ -57,16 +56,19 @@ class ProfitAnalysis:
                 self.pts += 3
              elif x > 10:
                 self.pts += 4
-                return "The loss exceed 1:1 zone"
 
-x=0
-def stop_loss(p_price,n_price):
-     global x
-     if p_price > n_price:
-      x = ((p_price - n_price)/p_price)*100
-      if x>10:
-        return "The loss exceed 1:1 zone"
-      return ""
+
+x = 0
+def stop_loss(p_price, n_price):
+    global x
+    if p_price > n_price:
+        x = ((p_price - n_price) / p_price) * 100
+        if x > 10:
+            return "The loss exceeds 1:1 zone"
+    else:
+        x = 0  
+    return ""  
+
      
 def analyze_pts(pts):
     if pts <= 4:
@@ -75,15 +77,27 @@ def analyze_pts(pts):
         return "Moderate level of selling suggestion"
     elif pts <= 13:
         return "High level of selling suggestion"
-    else:
-        return "Unknown suggestion"
-    
+
+def save_to_csv():
+    with open('companies_data.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        # Write header
+        writer.writerow([
+            'Company Purchasing Price', 'Company Up-to-date Price', 'Company P/E', 'Company ROE',
+            'Company ROA', 'Company Net Profit Margin', 'Company Dividend Yield', 'Industry P/E',
+            'Industry ROE', 'Industry ROA', 'Industry Net Profit Margin', 'Industry Dividend Yield',
+            'Points', 'Selling Suggestion', 'Stop Loss Message'
+        ])
+        # Write data
+        writer.writerows(companies_data)
 
 # List to store data for multiple companies
 companies_data = []
 
 def on_analyze_button_click():
-    # Read input values from GUI components
+    global y
+    y=0
+    
     p_price = float(p_price_entry.get())
     n_price = float(n_price_entry.get())
     p_e = float(p_e_entry.get())
@@ -97,7 +111,7 @@ def on_analyze_button_click():
     npm2 = float(npm2_entry.get())
     div2 = float(div2_entry.get())
 
-    # Perform analysis
+   
     profit_analysis = ProfitAnalysis()
     profit_analysis.price_earning(p_e, p_e2)
     profit_analysis.return_on_equity(roe, roe2)
@@ -179,14 +193,19 @@ analyze_button.grid(row=12, column=0, columnspan=2)
 result_label = tk.Label(root, text="")
 result_label.grid(row=13, column=0, columnspan=2)
 
-
+#stop_loss_
 stop_loss_label = tk.Label(root, text="")
 stop_loss_label.grid(row=14, column=0, columnspan=2)
 
-# Start the GUI event loop
+#savetocsv
+save_button = tk.Button(root, text="Save to CSV", command=save_to_csv)
+save_button.grid(row=15, column=0, columnspan=2)
+
+# Start the GUI eSvent loop
 root.mainloop()
 
 # Display all companies' data after the loop exits
 print("All Companies Data:")
 for i, data in enumerate(companies_data, start=1):
     print(f"Company {i} Data: {data}")
+
